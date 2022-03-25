@@ -11,7 +11,7 @@
 </template>
 <script>
 import { TradingVue } from "trading-vue-js";
-import { EMA } from "technicalindicators";
+import { EMA, RSI } from "technicalindicators";
 var axios = require("axios");
 
 var options = {
@@ -114,6 +114,7 @@ export default {
         },
         ...lines,
       ],
+      offchart: [{ name: "RSI", type: "RSI", data: [] }],
     };
   },
   methods: {
@@ -138,7 +139,6 @@ export default {
       this.ohlcv = this.apiData;
 
       this.prediction = this.candleStickPred();
-      this.calculateRSI();
 
       const closeData = [];
       this.apiData.forEach((d) => closeData.push(d[4]));
@@ -167,6 +167,17 @@ export default {
         this.onchart[3].data.push([d[0], emad]);
       });
 
+      var inputRSI = {
+        values: closeData,
+        period: 14,
+      };
+      const rsiData = RSI.calculate(inputRSI);
+      RSI.calculate(inputRSI);
+      this.apiData.forEach((d, i) => {
+        const emad = i > 14 ? rsiData[i - 14] : undefined;
+        this.offchart[0].data.push([d[0], emad]);
+      });
+
       this.$refs.tradingVue.resetChart();
     },
     candleStickPred() {
@@ -181,62 +192,11 @@ export default {
       }
       return true;
     },
-    calculateRSI() {
-      let avgGain = 0;
-      let avgLoss = 0;
-      for (let i = 0; i < 14; i++) {
-        let v =
-          this.apiData[this.apiData.length - (14 - (i + 1))] -
-          this.apiData[this.apiData.length - (14 - i)];
-        if (v <= 0) avgLoss += v;
-        if (v > 0) avgGain += v;
-      }
-      console.log(avgGain);
-      console.log(avgLoss);
-    },
   },
   created() {
     this.insertData();
   },
   mounted() {},
 };
-
-// csv.split("\n").forEach((l) => {
-//   const d = l.split(";");
-
-//   const open = parseFloat(d[1]);
-//   const high = parseFloat(d[2]);
-//   const low = parseFloat(d[3]);
-//   const close = parseFloat(d[4]);
-
-//   if (isNaN(open)) {
-//     return;
-//   }
-
-//   const date = moment.tz(d[0], "YYYYMMDD hhmmss", "EST").toDate();
-
-//   if (trades.length > 0) {
-//     if (
-//       date.getTime() < trades[0][0] - 3600000 * 5 ||
-//       date.getTime() > trades[trades.length - 1][0] + 3600000 * 3
-//     ) {
-//       return;
-//     }
-//   }
-
-//   data.push([date.getTime(), open, high, low, close]);
-// });
-
-// for (let i = 0; i < tempData.timestamp.length; i++) {
-//   // this.apiData.push([
-//   //   tempData.timestamp[i],
-//   //   tempData.indicators.quote[0].open[i],
-//   //   tempData.indicators.quote[0].high[i],
-//   //   tempData.indicators.quote[0].low[i],
-//   //   tempData.indicators.quote[0].close[i],
-//   // ]);
-//   console.log(this.apiData);
-// }
-// // console.log(data);
 </script>
 <style></style>
