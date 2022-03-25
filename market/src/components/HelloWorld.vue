@@ -1,10 +1,13 @@
 <template>
-  <trading-vue
-    :data="this.$data"
-    :width="this.width"
-    :height="this.height"
-    ref="tradingVue"
-  ></trading-vue>
+  <div>
+    <trading-vue
+      :data="this.$data"
+      :width="this.width"
+      :height="this.height"
+      ref="tradingVue"
+    ></trading-vue>
+    <div>Buy? {{ prediction }}</div>
+  </div>
 </template>
 <script>
 import { TradingVue } from "trading-vue-js";
@@ -13,7 +16,7 @@ var axios = require("axios");
 
 var options = {
   method: "GET",
-  url: "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=AAPL&interval=5min&apikey=2BE85W95139F18CL&outputsize=full",
+  url: "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=2BE85W95139F18CL&outputsize=full",
 };
 
 let data = [];
@@ -64,37 +67,6 @@ const lines = [];
 //   });
 // });
 
-const closeData = [];
-data.forEach((d) => closeData.push(d[4]));
-
-const ema9Data = new EMA.calculate({ period: 9, values: closeData });
-const ema9 = [];
-data.forEach((d, i) => {
-  const emad = i > 9 ? ema9Data[i - 9] : undefined;
-  ema9.push([d[0], emad]);
-});
-
-const ema20Data = new EMA.calculate({ period: 20, values: closeData });
-const ema20 = [];
-data.forEach((d, i) => {
-  const emad = i > 20 ? ema20Data[i - 20] : undefined;
-  ema20.push([d[0], emad]);
-});
-
-const ema50Data = new EMA.calculate({ period: 50, values: closeData });
-const ema50 = [];
-data.forEach((d, i) => {
-  const emad = i > 50 ? ema50Data[i - 50] : undefined;
-  ema50.push([d[0], emad]);
-});
-
-const ema200Data = new EMA.calculate({ period: 200, values: closeData });
-const ema200 = [];
-data.forEach((d, i) => {
-  const emad = i > 200 ? ema200Data[i - 200] : undefined;
-  ema200.push([d[0], emad]);
-});
-
 export default {
   name: "app",
   components: { TradingVue },
@@ -102,6 +74,7 @@ export default {
   data() {
     return {
       apiData: [],
+      prediction: false,
       titleText: "Market Manipulator2k",
       width: window.innerWidth - 20,
       height: window.innerHeight - 20,
@@ -110,25 +83,25 @@ export default {
         {
           name: "EMA 9",
           type: "EMA",
-          data: ema9,
+          data: [],
           settings: { color: "white" },
         },
         {
           name: "EMA 20",
           type: "EMA",
-          data: ema20,
+          data: [],
           settings: { color: "yellow" },
         },
         {
           name: "EMA 50",
           type: "EMA",
-          data: ema50,
+          data: [],
           settings: { color: "purple" },
         },
         {
           name: "EMA 200",
           type: "EMA",
-          data: ema200,
+          data: [],
           settings: { color: "orange" },
         },
         {
@@ -149,7 +122,6 @@ export default {
     },
     async insertData() {
       const res = await this.fetchData();
-
       for (const [timestamp, value] of Object.entries(
         res.data["Time Series (5min)"]
       )) {
@@ -163,17 +135,70 @@ export default {
         ]);
       }
       this.apiData.reverse();
-      console.log(this.apiData);
       this.ohlcv = this.apiData;
+
+      this.prediction = this.candleStickPred();
+      this.calculateRSI();
+
+      const closeData = [];
+      this.apiData.forEach((d) => closeData.push(d[4]));
+
+      const ema9Data = new EMA.calculate({ period: 9, values: closeData });
+      this.apiData.forEach((d, i) => {
+        const emad = i > 9 ? ema9Data[i - 9] : undefined;
+        this.onchart[0].data.push([d[0], emad]);
+      });
+
+      const ema20Data = new EMA.calculate({ period: 20, values: closeData });
+      this.apiData.forEach((d, i) => {
+        const emad = i > 20 ? ema20Data[i - 20] : undefined;
+        this.onchart[1].data.push([d[0], emad]);
+      });
+
+      const ema50Data = new EMA.calculate({ period: 50, values: closeData });
+      this.apiData.forEach((d, i) => {
+        const emad = i > 50 ? ema50Data[i - 50] : undefined;
+        this.onchart[2].data.push([d[0], emad]);
+      });
+
+      const ema200Data = new EMA.calculate({ period: 200, values: closeData });
+      this.apiData.forEach((d, i) => {
+        const emad = i > 200 ? ema200Data[i - 200] : undefined;
+        this.onchart[3].data.push([d[0], emad]);
+      });
+
       this.$refs.tradingVue.resetChart();
+    },
+    candleStickPred() {
+      for (let i = 1; i <= 3; i++) {
+        let v =
+          this.apiData[this.apiData.length - i][4] -
+          this.apiData[this.apiData.length - i][1];
+
+        if (parseFloat(v) <= 0) {
+          return false;
+        }
+      }
+      return true;
+    },
+    calculateRSI() {
+      let avgGain = 0;
+      let avgLoss = 0;
+      for (let i = 0; i < 14; i++) {
+        let v =
+          this.apiData[this.apiData.length - (14 - (i + 1))] -
+          this.apiData[this.apiData.length - (14 - i)];
+        if (v <= 0) avgLoss += v;
+        if (v > 0) avgGain += v;
+      }
+      console.log(avgGain);
+      console.log(avgLoss);
     },
   },
   created() {
     this.insertData();
   },
-  mounted() {
-    this.$refs.tradingVue.resetChart();
-  },
+  mounted() {},
 };
 
 // csv.split("\n").forEach((l) => {
