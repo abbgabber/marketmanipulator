@@ -1,23 +1,27 @@
 <template>
   <div>
+    <label for="Stock">Choose a stock:</label>
+
+    <select name="Stocks" v-model="stocks">
+      <option v-for="(item, i) in items" :key="i" :value="item.id">
+        {{ item.name }}
+      </option>
+    </select>
     <trading-vue
       :data="this.$data"
       :width="this.width"
       :height="this.height"
       ref="tradingVue"
     ></trading-vue>
+
     <div>Buy? {{ prediction }}</div>
+    <div>Selected Stock: {{ stocks }}</div>
   </div>
 </template>
 <script>
 import { TradingVue } from "trading-vue-js";
 import { EMA, RSI } from "technicalindicators";
 var axios = require("axios");
-
-var options = {
-  method: "GET",
-  url: "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=2BE85W95139F18CL&outputsize=full",
-};
 
 let data = [];
 
@@ -73,6 +77,11 @@ export default {
 
   data() {
     return {
+      items: [
+        { name: "Apple", id: "AAPL" },
+        { name: "IBM", id: "IBM" },
+      ],
+      stocks: "",
       apiData: [],
       prediction: false,
       titleText: "Market Manipulator2k",
@@ -118,11 +127,18 @@ export default {
     };
   },
   methods: {
-    async fetchData() {
-      return await axios.request(options);
+    async fetchData(id) {
+      return await axios.request({
+        method: "GET",
+        url:
+          "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" +
+          id +
+          "&interval=5min&apikey=2BE85W95139F18CL&outputsize=full",
+      });
     },
-    async insertData() {
-      const res = await this.fetchData();
+    async insertData(id) {
+      this.apiData = [];
+      const res = await this.fetchData(id);
       for (const [timestamp, value] of Object.entries(
         res.data["Time Series (5min)"]
       )) {
@@ -194,9 +210,14 @@ export default {
     },
   },
   created() {
-    this.insertData();
+    // this.insertData();
   },
   mounted() {},
+  watch: {
+    stocks() {
+      this.insertData(this.stocks);
+    },
+  },
 };
 </script>
 <style></style>
