@@ -14,7 +14,7 @@
       ref="tradingVue"
     ></trading-vue>
 
-    <div>Buy? {{ prediction }}</div>
+    <div > Status: {{status()}}</div>
     <div>Selected Stock: {{ stocks }}</div>
   </div>
 </template>
@@ -208,7 +208,20 @@ export default {
       }
       return true;
     },
+    status(){
+     if (this.candleStickPred){
+       return "Buy"
+     }
+     else if (this.candleStickPredRed){
+       return "Sell"
+     }
+     else{
+       return "Hold"
+     }
+     },
+
   },
+  
   created() {
     // this.insertData();
   },
