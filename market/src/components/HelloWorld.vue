@@ -28,6 +28,7 @@
         hint="Select your stock"
         return-object
         outlined
+        left
       ></v-select>
     </div>
 
@@ -40,14 +41,26 @@
 
     <div class="data" v-if="apiData.length > 0">
       <h4>Current price: {{ apiData[apiData.length - 1][4] }}</h4>
+      <h4>7-day price: {{ weekChange[4] }}</h4>
+      <h4>
+        Change 7-day:
+        {{ (apiData[apiData.length - 1][4] / weekChange[4]) * 100 }}%
+      </h4>
+      <h4>Year Price: {{ yearChange[4] }}</h4>
+      <h4>
+        Change last year:
+        {{ (apiData[apiData.length - 1][4] / yearChange[4]) * 100 }}%
+      </h4>
     </div>
   </div>
 </template>
 <script>
 import { TradingVue } from "trading-vue-js";
 import { EMA, RSI } from "technicalindicators";
+
 var axios = require("axios");
 const timezoneData = require("./tz.json");
+const jsonStocks = require("../assets/stockJson.json");
 
 let data = [];
 
@@ -57,19 +70,14 @@ export default {
 
   data() {
     return {
-      items: [
-        { name: "Apple", id: "AAPL" },
-        {
-          name: "Tesla",
-          id: "TSLA",
-        },
-        { name: "IBM", id: "IBM" },
-      ],
+      items: jsonStocks,
       tz: timezoneData[26],
       loading: false,
       stocks: "",
       timezoneData: timezoneData,
       apiData: [],
+      weekChange: "",
+      yearChange: "",
       prediction: false,
       titleText: "Market Manipulator2k",
       width: document.documentElement.clientWidth,
@@ -114,7 +122,7 @@ export default {
       return await axios.request({
         method: "GET",
         url:
-          "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" +
+          "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" +
           id +
           "&interval=5min&apikey=2BE85W95139F18CL&outputsize=full",
       });
@@ -122,8 +130,9 @@ export default {
     async insertData(id) {
       this.apiData = [];
       const res = await this.fetchData(id);
+      console.log(res);
       for (const [timestamp, value] of Object.entries(
-        res.data["Time Series (5min)"]
+        res.data["Time Series (Daily)"]
       )) {
         let date = new Date(timestamp);
         this.apiData.push([
@@ -199,13 +208,17 @@ export default {
     async updateData(id) {
       this.loading = true;
       await this.insertData(id);
+      await this.getStats();
       this.loading = false;
     },
+    async getStats() {
+      this.weekChange = this.apiData[this.apiData.length - 4];
+      this.yearChange = this.apiData[this.apiData.length - (5 * 52 - 7)];
+    },
   },
-  created() {
-    // this.insertData();
-  },
+  // created() {},
   mounted() {
+    this.tz = JSON.parse(localStorage.getItem("timezone"));
     window.addEventListener("resize", this.getDimensions, { passive: true });
   },
   unmounted() {
@@ -216,6 +229,7 @@ export default {
       this.updateData(this.stocks.id);
     },
     tz() {
+      localStorage.setItem("timezone", JSON.stringify(this.tz));
       if (this.apiData.length > 0) {
         this.updateData(this.stocks.id);
       }
@@ -227,7 +241,7 @@ export default {
 .options {
   position: absolute;
   z-index: 10;
-  left: 85vw;
+  left: 82vw;
   top: 2vh;
   max-width: 11rem;
 }
