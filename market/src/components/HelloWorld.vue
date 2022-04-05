@@ -1,12 +1,27 @@
 <template>
   <div>
-    <label for="Stock">Choose a stock:</label>
+    <!-- <div class="loading"><h1>HELLO WORLD</h1></div> -->
+    <div class="loading" v-if="loading">
+      <v-progress-circular
+        indeterminate
+        color="blue"
+        size="72"
+      ></v-progress-circular>
+    </div>
 
-    <select name="Stocks" v-model="stocks">
-      <option v-for="(item, i) in items" :key="i" :value="item.id">
-        {{ item.name }}
-      </option>
-    </select>
+    <div class="select--stock">
+      <h3>Select a stock</h3>
+      <v-select
+        v-model="stocks"
+        :items="items"
+        item-text="name"
+        item-value="id"
+        label="Stocks"
+        return-object
+        outlined
+      ></v-select>
+    </div>
+
     <trading-vue
       :data="this.$data"
       :width="this.width"
@@ -16,6 +31,14 @@
 
     <div > Status: {{status()}}</div>
     <div>Selected Stock: {{ stocks }}</div>
+     <div class="data" v-if="apiData.length > 0">
+      <h4>Current price: {{ apiData[apiData.length - 1][4] }}</h4>
+      <h4>7-day change: </h4>
+      <h4>2 months change: </h4>
+      <h4>Previous close: </h4>
+      <!-- Price*, 7-week change (price + %), 1-year change (price + %), Previous Close  -->
+    </div>
+
   </div>
 </template>
 <script>
@@ -79,8 +102,13 @@ export default {
     return {
       items: [
         { name: "Apple", id: "AAPL" },
+        {
+          name: "Tesla",
+          id: "TSLA",
+        },
         { name: "IBM", id: "IBM" },
       ],
+      loading: false,
       stocks: "",
       apiData: [],
       prediction: false,
@@ -220,6 +248,11 @@ export default {
      }
      },
 
+    async updateData(id) {
+      this.loading = true;
+      await this.insertData(id);
+      this.loading = false;
+    },
   },
   
   created() {
@@ -228,9 +261,24 @@ export default {
   mounted() {},
   watch: {
     stocks() {
-      this.insertData(this.stocks);
+      this.updateData(this.stocks.id);
     },
   },
 };
 </script>
-<style></style>
+<style>
+.select--stock {
+  position: absolute;
+  z-index: 10;
+  left: 85vw;
+  top: 2vh;
+  max-width: 10rem;
+}
+.loading {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 11;
+}
+</style>
