@@ -6,8 +6,23 @@ const jsonStocks = require("./stockJson.json");
 
 console.log("Starting function");
 
-for (let i = 0; i < 1; i++) {
-  await insertData(jsonStocks[i].id);
+for (let i = 0; i < 11; ) {
+  if (i % 5 == 0) {
+    setTimeout(function () {
+      console.log("i timer", i);
+    }, 60 * 1000);
+  }
+  try {
+    insertData(jsonStocks[i].id).catch((err) =>
+      console.log("insert data error: ", err)
+    );
+    i++;
+  } catch (error) {
+    console.log(error);
+    setTimeout(function () {
+      console.log("i catch", i);
+    }, 60 * 1000);
+  }
 }
 
 //   const response = {
@@ -17,11 +32,11 @@ for (let i = 0; i < 1; i++) {
 //   return response;
 // };
 
-function getRandomInt(min, max) {
-  min = Math.ceil(28);
-  max = Math.floor(32);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+// function getRandomInt(min, max) {
+//   min = Math.ceil(28);
+//   max = Math.floor(32);
+//   return Math.floor(Math.random() * (max - min + 1)) + min;
+// }
 
 async function insertData(id) {
   let apiData = [];
@@ -31,6 +46,8 @@ async function insertData(id) {
 
   apiData = [];
   const res = await fetchData(id);
+
+  if (!res.data["Time Series (Daily)"]) throw "No data";
 
   for (const [timestamp, value] of Object.entries(
     res.data["Time Series (Daily)"]
@@ -55,7 +72,7 @@ async function insertData(id) {
     values: closeData,
     period: 14,
   };
-  console.log("hello from lambda");
+  // console.log("hello from lambda");
   const rsiData = RSI.calculate(inputRSI);
   RSI.calculate(inputRSI);
   rsi = [];
@@ -65,7 +82,7 @@ async function insertData(id) {
   });
 
   // rsi.push(["Hello", getRandomInt(28, 32)]);
-  // console.log("hello from rsi", rsi[rsi.length - 1]);
+  console.log(id, rsi[rsi.length - 1]);
 
   for (let i = rsi.length - 1; i > rsi.length - 3; i--) {
     if ((rsi[i][1] = undefined)) return;

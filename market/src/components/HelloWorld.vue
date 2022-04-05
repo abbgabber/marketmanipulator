@@ -9,7 +9,7 @@
     </div>
 
     <div class="options">
-      <v-select
+      <!-- <v-select
         class="options--timezone"
         v-model="tz"
         :items="timezoneData"
@@ -18,7 +18,7 @@
         hint="Select your timezone"
         return-object
         outlined
-      ></v-select>
+      ></v-select> -->
       <v-select
         v-model="stocks"
         :items="items"
@@ -59,7 +59,7 @@ import { TradingVue } from "trading-vue-js";
 import { EMA, RSI } from "technicalindicators";
 
 var axios = require("axios");
-const timezoneData = require("./tz.json");
+const timezoneData = require("../assets/tz.json");
 const jsonStocks = require("../assets/stockJson.json");
 
 let data = [];
@@ -124,7 +124,7 @@ export default {
         url:
           "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" +
           id +
-          "&interval=5min&apikey=2BE85W95139F18CL&outputsize=full",
+          "&interval=5min&apikey=FUOIZZHV806NY77H&outputsize=full",
       });
     },
     async insertData(id) {
