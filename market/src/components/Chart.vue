@@ -113,13 +113,14 @@ export default {
         url:
           "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" +
           id +
-          "&interval=1dmin&apikey=FUOIZZHV806NY77H&outputsize=full",
+          "&interval=1d&apikey=FUOIZZHV806NY77H&outputsize=full",
       });
     },
     async insertData(id) {
       this.apiData = [];
       const res = await this.fetchData(id);
       console.log(res);
+      console.log(Object.entries(res.data["Time Series (Daily)"]));
       for (const [timestamp, value] of Object.entries(
         res.data["Time Series (Daily)"]
       )) {
@@ -214,13 +215,8 @@ export default {
   },
   watch: {
     stocks() {
+      if (this.stocks == null) return;
       this.updateData(this.stocks.id);
-    },
-    tz() {
-      localStorage.setItem("timezone", JSON.stringify(this.tz));
-      if (this.apiData.length > 0) {
-        this.updateData(this.stocks.id);
-      }
     },
   },
 };
