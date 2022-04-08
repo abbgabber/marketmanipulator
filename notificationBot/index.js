@@ -1,9 +1,17 @@
 var RSI = require("technicalindicators").RSI;
 var axios = require("axios");
 const jsonStocks = require("./stockJson.json");
+const cronitor = require("cronitor")("b5c26d908e214204a9d02c4a1f217408");
 
 exports.handler = async (event) => {
+  const monitor = await cronitor.Monitor.put({
+    type: "job",
+    key: "stockChecker",
+    schedule: "0 10 * * *",
+  });
+
   console.log("Starting function");
+  monitor.ping({ state: "run" });
 
   await getData(jsonStocks);
 
@@ -11,6 +19,8 @@ exports.handler = async (event) => {
     statusCode: 200,
     body: JSON.stringify("Hello from Lambda!"),
   };
+
+  await monitor.ping({ state: "complete" });
   return response;
 };
 
@@ -44,8 +54,6 @@ async function insertData(id) {
     ]);
   }
 
-  apiData.reverse();
-
   const closeData = [];
 
   apiData.forEach((d) => closeData.push(d[4]));
@@ -64,40 +72,46 @@ async function insertData(id) {
   });
 
   // rsi.push([new Date().getTime(), 69]);
+  // console.log(apiData);
 
-  console.log(id, rsi[rsi.length - 1]);
-
-  for (let i = rsi.length - 1; i > rsi.length - 3; i--) {
-    console.log(rsi[i][1]);
-    if (rsi[i][1] === undefined) return;
-    if (parseInt(rsi[i][1]) <= 32 && parseInt(rsi[i][1]) >= 28) {
-      // console.log("buying");
-      await axios
-        .post(url, {
-          content: "Check out " + id + " it has an RSI of " + rsi[i][1],
-        })
-        .then(console.log("Buy signal sent"));
-      return;
-    }
-    if (parseInt(rsi[i][1]) <= 72 && parseInt(rsi[i][1]) >= 68) {
-      // console.log("selling");
-      await axios
-        .post(url, {
-          content: "Check out " + id + " it has an RSI of " + rsi[i][1],
-        })
-        .then(console.log("Sell signal sent"));
-      return;
-    }
+  console.log(rsi[rsi.length - 1][1]);
+  if (rsi[rsi.length - 1][1] === undefined) return;
+  if (
+    parseInt(rsi[rsi.length - 1][1]) <= 32 &&
+    parseInt(rsi[rsi.length - 1][1]) >= 28
+  ) {
+    // console.log("buying");
+    await axios
+      .post(url, {
+        content:
+          "Check out " + id + " it has an RSI of " + rsi[rsi.length - 1][1],
+      })
+      .then(console.log("Buy signal sent"));
+    return;
+  }
+  if (
+    parseInt(rsi[rsi.length - 1][1]) <= 72 &&
+    parseInt(rsi[rsi.length - 1][1]) >= 68
+  ) {
+    // console.log("selling");
+    await axios
+      .post(url, {
+        content:
+          "Check out " + id + " it has an RSI of " + rsi[rsi.length - 1][1],
+      })
+      .then(console.log("Sell signal sent"));
+    return;
   }
 }
+
 async function fetchData(id) {
   return axios.request({
     method: "GET",
     url:
       "https://yfapi.net/v8/finance/chart/" +
       id +
-      "?range=1mo&region=US&interval=1d&lang=en&events=div%2Csplit",
+      "?range=1y&region=US&interval=1d&lang=en",
 
-    headers: { "X-API-KEY": "z6jTzCRuFqygnAxCi9AR538SrAhncnUa1kGYlKD9" },
+    headers: { "X-API-KEY": "JWUPQkJyvq3xFoDcNP1DC9cQS5xjq3tH7In2Mgo9" },
   });
 }
