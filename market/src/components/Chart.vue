@@ -19,36 +19,48 @@
         return-object
         outlined
       ></v-autocomplete>
+      <v-select
+        v-model="selectedOptions"
+        :items="options"
+        :menu-props="{ maxHeight: '400' }"
+        label="Select"
+        multiple
+        hint="Pick your favorite states"
+        persistent-hint
+      ></v-select>
     </div>
-<v-container>
-  <v-row>
-    <v-col cols="12" :height = "this.height" sm="9">
-      <trading-vue
-      :data="this.$data"
-      :width="this.width"
-      :height="this.height"
-      ref="tradingVue"
-    ></trading-vue>
-    
-    </v-col>
-    <v-col cols="12" sm="3">
-      <div class="data" v-if="apiData.length > 0">
-      <h4>Current price: {{ apiData[apiData.length - 1][4] }}</h4>
-      <h4>7-day price: {{ weekChange[4] }}</h4>
-      <h4>
-        Change 7-day:
-        {{ (apiData[apiData.length - 1][4] / weekChange[4]) * 100 }}%
-      </h4>
-      <h4>Year Price: {{ yearChange[4] }}</h4>
-      <h4>
-        Change last year:
-        {{ (apiData[apiData.length - 1][4] / yearChange[4]) * 100 }}%
-      </h4>
-    </div>
-    </v-col>
-  </v-row>
-</v-container>
-    
+    <v-container class="noPadding">
+      <v-row class="noPadding">
+        <v-col
+          cols="12"
+          :height="this.height"
+          class="tradeCol noPadding"
+          sm="9"
+        >
+          <trading-vue
+            :data="this.$data"
+            :width="this.width"
+            :height="this.height"
+            ref="tradingVue"
+          ></trading-vue>
+        </v-col>
+        <v-col cols="12" sm="3">
+          <div class="data" v-if="apiData.length > 0">
+            <h4>Current price: {{ apiData[apiData.length - 1][4] }}</h4>
+            <h4>7-day price: {{ weekChange[4] }}</h4>
+            <h4>
+              Change 7-day:
+              {{ (apiData[apiData.length - 1][4] / weekChange[4]) * 100 }}%
+            </h4>
+            <h4>Year Price: {{ yearChange[4] }}</h4>
+            <h4>
+              Change last year:
+              {{ (apiData[apiData.length - 1][4] / yearChange[4]) * 100 }}%
+            </h4>
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
   </div>
 </template>
 <script>
@@ -67,6 +79,8 @@ export default {
 
   data() {
     return {
+      selectedOptions: "",
+      options: ["RSI", "3-Line Strike"],
       items: jsonStocks,
       tz: timezoneData[26],
       loading: false,
@@ -112,8 +126,8 @@ export default {
   },
   methods: {
     getDimensions() {
-      this.width = document.documentElement.clientWidth/3;
-      this.height = document.documentElement.clientHeight/3;
+      this.width = document.querySelector(".tradeCol").offsetWidth;
+      this.height = document.querySelector(".tradeCol").offsetHeight;
     },
     async fetchData(id) {
       return await axios.request({
@@ -127,7 +141,7 @@ export default {
     async insertData(id) {
       this.apiData = [];
       const res = await this.fetchData(id);
-  // console.log(res.data)
+      // console.log(res.data)
       for (let [timestamp, value] of Object.entries(
         res.data["Time Series (Daily)"]
       )) {
@@ -136,8 +150,8 @@ export default {
         // console.log(value)
         // console.log(value["1. open"])
         this.apiData.push([
-           date.getTime() //+ (parseInt(this.tz.value) + 4) * 60 * 60 * 1000,
-          ,parseFloat(value["1. open"]),
+          date.getTime(), //+ (parseInt(this.tz.value) + 4) * 60 * 60 * 1000,
+          parseFloat(value["1. open"]),
           parseFloat(value["2. high"]),
           parseFloat(value["3. low"]),
           parseFloat(value["4. close"]),
@@ -217,13 +231,19 @@ export default {
   },
   // created() {},
   mounted() {
+    this.getDimensions();
     this.tz = JSON.parse(localStorage.getItem("timezone"));
+    this.selectedOptions = JSON.parse(localStorage.getItem("options"));
     window.addEventListener("resize", this.getDimensions, { passive: true });
   },
   unmounted() {
     window.removeEventListener("resize", this.getDimensions, { passive: true });
   },
   watch: {
+    selectedOptions() {
+      console.log(this.selectedOptions);
+      localStorage.setItem("options", JSON.stringify(this.selectedOptions));
+    },
     stocks() {
       if (this.stocks == null) return;
       this.updateData(this.stocks.id);
@@ -232,6 +252,11 @@ export default {
 };
 </script>
 <style>
+.noPadding {
+  padding: 0 !important;
+  /* padding-bottom: 1px !important; */
+  margin: 0 !important;
+}
 .options {
   position: absolute;
   z-index: 10;

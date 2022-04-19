@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <Chart />
+    <Chart class="chart" />
   </div>
 </template>
 
@@ -15,3 +15,4 @@ export default {
   },
 };
 </script>
+<style></style>

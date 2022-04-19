@@ -75,29 +75,41 @@ async function insertData(id) {
   // console.log(apiData);
 
   console.log(rsi[rsi.length - 1][1]);
-  if (rsi[rsi.length - 1][1] === undefined) return;
   if (
-    parseInt(rsi[rsi.length - 1][1]) <= 32 &&
-    parseInt(rsi[rsi.length - 1][1]) >= 28
+    rsi[rsi.length - 1][1] === undefined ||
+    rsi[rsi.length - 2][1] === undefined
+  )
+    return;
+  if (
+    parseFloat(rsi[rsi.length - 2][1]) < 30 &&
+    parseFloat(rsi[rsi.length - 1][1]) >= 30
   ) {
     // console.log("buying");
     await axios
       .post(url, {
         content:
-          "Check out " + id + " it has an RSI of " + rsi[rsi.length - 1][1],
+          "Check out " +
+          id +
+          " it has an RSI of " +
+          rsi[rsi.length - 1][1] +
+          ", you should probably buy it.",
       })
       .then(console.log("Buy signal sent"));
     return;
   }
   if (
-    parseInt(rsi[rsi.length - 1][1]) <= 72 &&
-    parseInt(rsi[rsi.length - 1][1]) >= 68
+    parseFloat(rsi[rsi.length - 2][1]) > 70 &&
+    parseFloat(rsi[rsi.length - 1][1]) <= 70
   ) {
     // console.log("selling");
     await axios
       .post(url, {
         content:
-          "Check out " + id + " it has an RSI of " + rsi[rsi.length - 1][1],
+          "Check out " +
+          id +
+          " it has an RSI of " +
+          rsi[rsi.length - 1][1] +
+          ", you should probably sell it.",
       })
       .then(console.log("Sell signal sent"));
     return;
@@ -112,6 +124,6 @@ async function fetchData(id) {
       id +
       "?range=1y&region=US&interval=1d&lang=en",
 
-    headers: { "X-API-KEY": "JWUPQkJyvq3xFoDcNP1DC9cQS5xjq3tH7In2Mgo9" },
+    headers: { "x-api-key": "S4D8yTe80a1NWLoEeDT1g2MKV6kKSoHp1VH7pJyP" },
   });
 }
