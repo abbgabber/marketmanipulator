@@ -8,7 +8,21 @@
       ></v-progress-circular>
     </div>
 
-    <div class="options">
+    
+<v-container>
+  <v-row>
+    <v-col cols="12" :height = "this.height" class="tradeCol" sm="6">
+      <trading-vue
+      :data="this.$data"
+      :width="this.width"
+      :height="this.height"
+      ref="tradingVue"
+    ></trading-vue>
+    </v-col>
+    <v-col cols="12" sm="2">
+      <v-row>
+        <v-col>
+          <div class="options pa-sm-1" >
       <v-autocomplete
         v-model="stocks"
         :items="items"
@@ -19,7 +33,12 @@
         return-object
         outlined
       ></v-autocomplete>
-      <v-select
+    </div>
+        </v-col>
+
+        <v-col>
+          <div class="options">
+            <v-select
         v-model="selectedOptions"
         :items="options"
         :menu-props="{ maxHeight: '400' }"
@@ -28,39 +47,45 @@
         hint="Pick your favorite states"
         persistent-hint
       ></v-select>
-    </div>
-    <v-container class="noPadding">
-      <v-row class="noPadding">
-        <v-col
-          cols="12"
-          :height="this.height"
-          class="tradeCol noPadding"
-          sm="9"
-        >
-          <trading-vue
-            :data="this.$data"
-            :width="this.width"
-            :height="this.height"
-            ref="tradingVue"
-          ></trading-vue>
-        </v-col>
-        <v-col cols="12" sm="3">
-          <div class="data" v-if="apiData.length > 0">
-            <h4>Current price: {{ apiData[apiData.length - 1][4] }}</h4>
-            <h4>7-day price: {{ weekChange[4] }}</h4>
-            <h4>
-              Change 7-day:
-              {{ (apiData[apiData.length - 1][4] / weekChange[4]) * 100 }}%
-            </h4>
-            <h4>Year Price: {{ yearChange[4] }}</h4>
-            <h4>
-              Change last year:
-              {{ (apiData[apiData.length - 1][4] / yearChange[4]) * 100 }}%
-            </h4>
           </div>
         </v-col>
       </v-row>
-    </v-container>
+    
+    </v-col>
+    <v-col cols="12" sm="4">
+      <div class="data" v-if="apiData.length > 0">
+
+        <v-card style="width: 100%">
+          <v-row>
+            <v-col cols="6">
+              <h4 style="width: 200px">Current price:</h4>
+      <h4 style="width: 200px">7-day price:</h4>
+      <h4 style="width: 200px">
+        Change 7-day:
+       
+      </h4>
+      <h4 style="width: 200px">Year Price:</h4>
+      <h4 style="width: 200px">
+        Change last year:
+        
+      </h4>
+            </v-col>
+            <v-col cols="6" >
+              <h4 style="width: 200px">{{ (apiData[apiData.length - 1][4]).toFixed(2) }}</h4>
+      <h4 style="width: 200px">{{ (weekChange[4]).toFixed(2) }}</h4>
+      <h4 style="width: 200px">{{ ((apiData[apiData.length - 1][4] / weekChange[4]) * 100).toFixed(2) }}%</h4>
+      <h4 style="width: 200px">{{ (yearChange[4]).toFixed(2) }}</h4>
+      <h4 style="width: 200px">{{ ((apiData[apiData.length - 1][4] / yearChange[4]) * 100).toFixed(2) }}%</h4>
+            </v-col>
+          </v-row>
+          
+        </v-card>
+      
+    </div>
+    </v-col>
+  </v-row>
+</v-container>
+    
   </div>
 </template>
 <script>
@@ -258,7 +283,6 @@ export default {
   margin: 0 !important;
 }
 .options {
-  position: absolute;
   z-index: 10;
   left: 82vw;
   top: 2vh;
