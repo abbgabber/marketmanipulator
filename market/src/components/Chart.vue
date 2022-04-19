@@ -20,15 +20,19 @@
         outlined
       ></v-autocomplete>
     </div>
-
-    <trading-vue
+<v-container>
+  <v-row>
+    <v-col cols="12" :height = "this.height" sm="9">
+      <trading-vue
       :data="this.$data"
       :width="this.width"
       :height="this.height"
       ref="tradingVue"
     ></trading-vue>
-
-    <div class="data" v-if="apiData.length > 0">
+    
+    </v-col>
+    <v-col cols="12" sm="3">
+      <div class="data" v-if="apiData.length > 0">
       <h4>Current price: {{ apiData[apiData.length - 1][4] }}</h4>
       <h4>7-day price: {{ weekChange[4] }}</h4>
       <h4>
@@ -41,6 +45,10 @@
         {{ (apiData[apiData.length - 1][4] / yearChange[4]) * 100 }}%
       </h4>
     </div>
+    </v-col>
+  </v-row>
+</v-container>
+    
   </div>
 </template>
 <script>
@@ -104,8 +112,8 @@ export default {
   },
   methods: {
     getDimensions() {
-      this.width = document.documentElement.clientWidth;
-      this.height = document.documentElement.clientHeight;
+      this.width = document.documentElement.clientWidth/3;
+      this.height = document.documentElement.clientHeight/3;
     },
     async fetchData(id) {
       return await axios.request({
@@ -119,15 +127,17 @@ export default {
     async insertData(id) {
       this.apiData = [];
       const res = await this.fetchData(id);
-      console.log(res);
-      console.log(Object.entries(res.data["Time Series (Daily)"]));
-      for (const [timestamp, value] of Object.entries(
+  // console.log(res.data)
+      for (let [timestamp, value] of Object.entries(
         res.data["Time Series (Daily)"]
       )) {
+        // console.log(value)
         let date = new Date(timestamp);
+        // console.log(value)
+        // console.log(value["1. open"])
         this.apiData.push([
-          date.getTime() + (parseInt(this.tz.value) + 4) * 60 * 60 * 1000,
-          parseFloat(value["1. open"]),
+           date.getTime() //+ (parseInt(this.tz.value) + 4) * 60 * 60 * 1000,
+          ,parseFloat(value["1. open"]),
           parseFloat(value["2. high"]),
           parseFloat(value["3. low"]),
           parseFloat(value["4. close"]),
