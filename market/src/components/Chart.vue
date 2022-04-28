@@ -9,7 +9,7 @@
     </div>
 
     
-<v-container>
+<v-container style = "padding: 0; margin: 0">
   <v-row>
     <v-col cols="12" :height = "this.height" class="tradeCol" sm="6">
       <trading-vue
@@ -19,7 +19,7 @@
       ref="tradingVue"
     ></trading-vue>
     </v-col>
-    <v-col cols="12" sm="2">
+    <v-col cols="12" sm="2" style="padding-left: 20px; padding-top: 1rem">
       <v-row>
         <v-col>
           <div class="options pa-sm-1" >
@@ -36,9 +36,9 @@
     </div>
         </v-col>
 
-        <v-col>
-          <div class="options">
-            <v-select
+        <v-col style="padding-left: 20px">
+          <div class="options" >
+            <v-select style = "margin-top: 0"
         v-model="selectedOptions"
         :items="options"
         :menu-props="{ maxHeight: '400' }"
@@ -52,7 +52,7 @@
       </v-row>
     
     </v-col>
-    <v-col cols="12" sm="4">
+    <v-col cols="12" sm="4" style = "margin-top:20px">
       <div class="data" v-if="apiData.length > 0">
 
         <v-card style="width: 100%">
@@ -71,11 +71,11 @@
       </h4>
             </v-col>
             <v-col cols="6" >
-              <h4 style="width: 200px">{{ (apiData[apiData.length - 1][4]).toFixed(2) }}</h4>
-      <h4 style="width: 200px">{{ (weekChange[4]).toFixed(2) }}</h4>
-      <h4 style="width: 200px">{{ ((apiData[apiData.length - 1][4] / weekChange[4]) * 100).toFixed(2) }}%</h4>
-      <h4 style="width: 200px">{{ (yearChange[4]).toFixed(2) }}</h4>
-      <h4 style="width: 200px">{{ ((apiData[apiData.length - 1][4] / yearChange[4]) * 100).toFixed(2) }}%</h4>
+              <h4 style="width: 150px">{{ (apiData[apiData.length - 1][4]).toFixed(2) }}</h4>
+      <h4 style="width: 150px">{{ (weekChange[4]).toFixed(2) }}</h4>
+      <h4 style="width: 150px">{{ ((apiData[apiData.length - 1][4] / weekChange[4]) * 100).toFixed(2) }}%</h4>
+      <h4 style="width: 150px">{{ (yearChange[4]).toFixed(2) }}</h4>
+      <h4 style="width: 150px">{{ ((apiData[apiData.length - 1][4] / yearChange[4]) * 100).toFixed(2) }}%</h4>
             </v-col>
           </v-row>
           
