@@ -19,9 +19,9 @@
       ref="tradingVue"
     ></trading-vue>
     </v-col>
-    <v-col cols="12" sm="2" style="padding-left: 20px; padding-top: 1rem">
-      <v-row>
-        <v-col>
+    <v-col cols="12" sm="2"  style="padding-left: 20px; padding-top: 1rem">
+      <v-row cols="12">
+        <v-col sm="12" xs="5">
           <div class="options pa-sm-1" >
       <v-autocomplete
         v-model="stocks"
@@ -36,7 +36,7 @@
     </div>
         </v-col>
 
-        <v-col style="padding-left: 20px">
+        <v-col sm="12" xs="5" style="padding-left: 20px">
           <div class="options" >
             <v-select style = "margin-top: 0"
         v-model="selectedOptions"
