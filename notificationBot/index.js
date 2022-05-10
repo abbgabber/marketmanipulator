@@ -3,7 +3,16 @@ var axios = require("axios");
 const jsonStocks = require("./stockJson.json");
 const cronitor = require("cronitor")("b5c26d908e214204a9d02c4a1f217408");
 
+const url =
+  "https://discord.com/api/webhooks/973532769445621790/8H0kYXeL8-h9jqogch48yyxJkkGzCSFxTG9VyIAfenBYrJaNcjORkIf8efj9zqPeTOze";
+
 exports.handler = async (event) => {
+  await axios
+    .post(url, {
+      content: "Stock Checker is running",
+    })
+    .then(console.log("Stock Checker is running"));
+
   const monitor = await cronitor.Monitor.put({
     type: "job",
     key: "stockChecker",
@@ -21,11 +30,17 @@ exports.handler = async (event) => {
   };
 
   await monitor.ping({ state: "complete" });
+  await axios
+    .post(url, {
+      content: "Stock Checker Complete",
+    })
+    .then(console.log("Stock Checker Complete"));
   return response;
 };
 
 async function getData(data) {
   for (let i = 0; i < jsonStocks.length - 1; i++) {
+    if (i > 99) return;
     console.log("i", i);
 
     await insertData(data[i].id);
@@ -36,8 +51,6 @@ async function insertData(id) {
   let apiData = [];
   let rsi = [];
   apiData = [];
-  let url =
-    "https://discord.com/api/webhooks/961903870605398066/CMNlvPQK9-lkhDgxExk2b3TU2Br8FLYIPcgV_P-6So48DdBrf_qyXvvEFKdl18gANed-";
 
   const res = await fetchData(id);
 
@@ -124,6 +137,6 @@ async function fetchData(id) {
       id +
       "?range=1y&region=US&interval=1d&lang=en",
 
-    headers: { "x-api-key": "S4D8yTe80a1NWLoEeDT1g2MKV6kKSoHp1VH7pJyP" },
+    headers: { "x-api-key": "R1xmhSmODM48PK5TUNlS62HhgU6BEeNIvNGqWrg9" },
   });
 }
