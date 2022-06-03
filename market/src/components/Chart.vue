@@ -8,84 +8,111 @@
       ></v-progress-circular>
     </div>
 
-    
-<v-container style = "padding: 0; margin: 0">
-  <v-row>
-    <v-col cols="12" :height = "this.height" class="tradeCol" sm="6">
-      <trading-vue
-      :data="this.$data"
-      :width="this.width"
-      :height="this.height"
-      ref="tradingVue"
-    ></trading-vue>
-    </v-col>
-    <v-col cols="12" sm="2"  style="padding-left: 20px; padding-top: 1rem">
-      <v-row cols="12">
-        <v-col sm="12" xs="5">
-          <div class="options pa-sm-1" >
-      <v-autocomplete
-        v-model="stocks"
-        :items="items"
-        item-text="name"
-        item-value="id"
-        label="Stocks"
-        hint="Select your stock"
-        return-object
-        outlined
-      ></v-autocomplete>
-    </div>
+    <v-container style="padding: 0; margin: 0">
+      <v-row>
+        <v-col cols="12" :height="this.height" class="tradeCol" sm="6">
+          <trading-vue
+            :data="this.$data"
+            :width="this.width"
+            :height="this.height"
+            ref="tradingVue"
+          ></trading-vue>
         </v-col>
+        <v-col cols="12" sm="2" style="padding-left: 20px; padding-top: 1rem">
+          <v-row cols="12">
+            <v-col sm="12" xs="5">
+              <div class="options pa-sm-1">
+                <v-autocomplete
+                  v-model="stocks"
+                  :items="items"
+                  item-text="name"
+                  item-value="id"
+                  label="Stocks"
+                  hint="Select your stock"
+                  return-object
+                  outlined
+                ></v-autocomplete>
+              </div>
+            </v-col>
 
-        <v-col sm="12" xs="5" style="padding-left: 20px">
-          <div class="options" >
-            <v-select style = "margin-top: 0"
-        v-model="selectedOptions"
-        :items="options"
-        :menu-props="{ maxHeight: '400' }"
-        label="Select"
-        multiple
-        hint="Pick your favorite states"
-        persistent-hint
-      ></v-select>
+            <v-col sm="12" xs="5" style="padding-left: 20px">
+              <div class="options">
+                <v-select
+                  style="margin-top: 0"
+                  v-model="selectedOptions"
+                  :items="options"
+                  :menu-props="{ maxHeight: '400' }"
+                  label="Select"
+                  multiple
+                  hint="Pick your models"
+                  persistent-hint
+                ></v-select>
+              </div>
+            </v-col>
+          </v-row>
+        </v-col>
+        <v-col cols="12" sm="4" style="margin-top: 20px">
+          <div class="data" v-if="apiData.length > 0">
+            <v-card style="width: 100%">
+              <v-row>
+                <v-col cols="6">
+                  <h4 style="width: 200px">Current price:</h4>
+                  <h4 style="width: 200px">Current RSI:</h4>
+                  <h4 style="width: 200px">7-day price:</h4>
+                  <h4 style="width: 200px">Change 7-day:</h4>
+                  <h4 style="width: 200px">Last years price:</h4>
+                  <h4 style="width: 200px">Change last year:</h4>
+                  <h4 style="width: 200px">What to do:</h4>
+                </v-col>
+                <v-col cols="6">
+                  <h4 style="width: 150px">
+                    {{ apiData[apiData.length - 1][4].toFixed(2) }}
+                  </h4>
+                  <h4 style="width: 150px">
+                    {{ rsiData[rsiData.length - 1] }}
+                  </h4>
+                  <h4 style="width: 150px">{{ weekChange[4].toFixed(2) }}</h4>
+                  <h4
+                    style="width: 150px"
+                    :style="{
+                      color: getColor(
+                        (apiData[apiData.length - 1][4] / weekChange[4]) * 100
+                      ),
+                    }"
+                  >
+                    {{
+                      (
+                        (apiData[apiData.length - 1][4] / weekChange[4]) *
+                        100
+                      ).toFixed(2)
+                    }}%
+                  </h4>
+                  <h4 style="width: 150px">{{ yearChange[4].toFixed(2) }}</h4>
+                  <h4
+                    style="width: 150px"
+                    :style="{
+                      color: getColor(
+                        (apiData[apiData.length - 1][4] / yearChange[4]) * 100
+                      ),
+                    }"
+                  >
+                    {{
+                      (
+                        (apiData[apiData.length - 1][4] / yearChange[4]) *
+                        100
+                      ).toFixed(2)
+                    }}%
+                  </h4>
+                  <h4 style="width: 150px">
+                    {{ prediction }}
+                  </h4>
+                </v-col>
+              </v-row>
+            </v-card>
           </div>
         </v-col>
       </v-row>
-    
-    </v-col>
-    <v-col cols="12" sm="4" style = "margin-top:20px">
-      <div class="data" v-if="apiData.length > 0">
-
-        <v-card style="width: 100%">
-          <v-row>
-            <v-col cols="6">
-              <h4 style="width: 200px">Current price:</h4>
-      <h4 style="width: 200px">7-day price:</h4>
-      <h4 style="width: 200px">
-        Change 7-day:
-       
-      </h4>
-      <h4 style="width: 200px">Year Price:</h4>
-      <h4 style="width: 200px">
-        Change last year:
-        
-      </h4>
-            </v-col>
-            <v-col cols="6" >
-              <h4 style="width: 150px">{{ (apiData[apiData.length - 1][4]).toFixed(2) }}</h4>
-      <h4 style="width: 150px">{{ (weekChange[4]).toFixed(2) }}</h4>
-      <h4 style="width: 150px">{{ ((apiData[apiData.length - 1][4] / weekChange[4]) * 100).toFixed(2) }}%</h4>
-      <h4 style="width: 150px">{{ (yearChange[4]).toFixed(2) }}</h4>
-      <h4 style="width: 150px">{{ ((apiData[apiData.length - 1][4] / yearChange[4]) * 100).toFixed(2) }}%</h4>
-            </v-col>
-          </v-row>
-          
-        </v-card>
-      
-    </div>
-    </v-col>
-  </v-row>
-</v-container>
-    
+    </v-container>
   </div>
 </template>
 <script>
@@ -109,12 +136,13 @@ export default {
       items: jsonStocks,
       tz: timezoneData[26],
       loading: false,
+      rsiData: [],
       stocks: "",
       timezoneData: timezoneData,
       apiData: [],
       weekChange: "",
       yearChange: "",
-      prediction: false,
+      prediction: "",
       titleText: "Market Manipulator2k",
       width: document.documentElement.clientWidth,
       height: document.documentElement.clientHeight,
@@ -153,6 +181,15 @@ export default {
     getDimensions() {
       this.width = document.querySelector(".tradeCol").offsetWidth;
       this.height = document.querySelector(".tradeCol").offsetHeight;
+    },
+    getColor(v) {
+      if (v < 100) {
+        return "red";
+      } else if (v > 100) {
+        return "green";
+      } else {
+        return "white";
+      }
     },
     async fetchData(id) {
       return await axios.request({
@@ -222,12 +259,31 @@ export default {
         period: 14,
       };
       this.offchart[0].data = [];
-      const rsiData = RSI.calculate(inputRSI);
-      RSI.calculate(inputRSI);
+      this.rsiData = RSI.calculate(inputRSI);
       this.apiData.forEach((d, i) => {
-        const emad = i > 14 ? rsiData[i - 14] : undefined;
+        const emad = i > 14 ? this.rsiData[i - 14] : undefined;
         this.offchart[0].data.push([d[0], emad]);
       });
+
+      if (
+        this.rsiData[this.rsiData.length - 2] === undefined ||
+        this.rsiData[this.rsiData.length - 1] === undefined
+      ) {
+        this.prediction = "N/A";
+      } else if (
+        parseFloat(this.rsiData[this.rsiData.length - 2]) < 30 &&
+        parseFloat(this.rsiData[this.rsiData.length - 1]) >= 30
+      ) {
+        this.prediction = "Buy";
+      } else if (
+        parseFloat(this.rsiData[this.rsiData.length - 2]) > 70 &&
+        parseFloat(this.rsiData[this.rsiData.length - 1]) <= 70
+      ) {
+        this.prediction = "Sell";
+      } else {
+        this.prediction = "Hold";
+      }
+
       this.$refs.tradingVue.resetChart();
     },
 
